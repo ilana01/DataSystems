@@ -6,16 +6,16 @@ import json
 
 # --------- CONFIG ---------
 # Azure Config
-AZURE_CONNECTION_STRING = "your-azure-blob-connection-string"
-CONTAINER_NAME = "your-container-name"
+AZURE_CONNECTION_STRING = "DefaultEndpointsProtocol=https;AccountName=datadraft;AccountKey=nqr6YGXwxU+Lb+Yq+J2BBxTlXBH0FZTfgLqba4LdMjfXTaJyMKKIknmXhLjco/Hx7airCXTkEeu5+ASt+cfJKw==;EndpointSuffix=core.windows.net"
+CONTAINER_NAME = "datadraftdata"
 
 # Kaggle Config
-os.environ['KAGGLE_USERNAME'] = "your-kaggle-username"
-os.environ['KAGGLE_KEY'] = "your-kaggle-key"
+os.environ['KAGGLE_USERNAME'] = "matthewashleyz710"
+os.environ['KAGGLE_KEY'] = "f62f6ae1a27232a574dacd8a74e10b4e"
 
 # RapidAPI Config
 RAPIDAPI_KEY = "your-rapidapi-key"
-RAPIDAPI_HOST = "nba-api-free-data.p.rapidapi.com"
+RAPIDAPI_HOST = "71d056184dmshd2688b56e478f6bp12113bjsn"
 
 # Temporary local download path
 LOCAL_DATA_DIR = "data_temp"
@@ -83,10 +83,10 @@ def main():
     }
     
     # Example endpoint: getAllPlayers
-    rapidapi_data = fetch_rapidapi_data(endpoint="players", params={"team":"Golden State Warriors"}, headers=headers)
-    rapidapi_path = os.path.join(LOCAL_DATA_DIR, "nba_players_api.json")
-    save_json(rapidapi_data, rapidapi_path)
-    upload_to_azure(rapidapi_path, "nba_players_api.json")
+    # rapidapi_data = fetch_rapidapi_data(endpoint="players", params={"team":"Golden State Warriors"}, headers=headers)
+    # rapidapi_path = os.path.join(LOCAL_DATA_DIR, "nba_players_api.json")
+    # save_json(rapidapi_data, rapidapi_path)
+    # upload_to_azure(rapidapi_path, "nba_players_api.json")
 
 if __name__ == "__main__":
     main()
