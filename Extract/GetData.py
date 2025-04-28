@@ -1,8 +1,9 @@
 import os
 import requests
-from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
+from azure.storage.blob import BlobServiceClient
 import pandas as pd
 import json
+import zipfile
 
 # --------- CONFIG ---------
 # Azure Config
@@ -14,8 +15,8 @@ os.environ['KAGGLE_USERNAME'] = "matthewashleyz710"
 os.environ['KAGGLE_KEY'] = "f62f6ae1a27232a574dacd8a74e10b4e"
 
 # RapidAPI Config
-RAPIDAPI_KEY = "your-rapidapi-key"
-RAPIDAPI_HOST = "71d056184dmshd2688b56e478f6bp12113bjsn"
+RAPIDAPI_KEY = "71d056184dmshd2688b56e478f6bp12113bjsn1959cd78cb50"
+RAPIDAPI_HOST = "nba-api-free-data.p.rapidapi.com"
 
 # Temporary local download path
 LOCAL_DATA_DIR = "data_temp"
@@ -35,18 +36,37 @@ def download_kaggle_dataset(dataset_name, file_name, save_as):
     from kaggle.api.kaggle_api_extended import KaggleApi
     api = KaggleApi()
     api.authenticate()
-    api.dataset_download_file(dataset_name, file_name, path=LOCAL_DATA_DIR)
+    api.dataset_download_files(dataset_name, path=LOCAL_DATA_DIR, unzip=True)
     
-    full_path = os.path.join(LOCAL_DATA_DIR, save_as)
-    os.rename(os.path.join(LOCAL_DATA_DIR, file_name), full_path)
-    print(f"Downloaded {save_as} from Kaggle.")
-    return full_path
+    extracted_file_path = os.path.join(LOCAL_DATA_DIR, save_as)
+    if not os.path.exists(extracted_file_path):
+        raise FileNotFoundError(f"{save_as} not found in the extracted dataset.")
+    print(f"Downloaded and extracted {save_as} from Kaggle.")
+    return extracted_file_path
+def download_and_get_sqlite(dataset_name, expected_sqlite_filename):
+    from kaggle.api.kaggle_api_extended import KaggleApi
+    api = KaggleApi()
+    api.authenticate()
+    print(f"Downloading and extracting {dataset_name}...")
+    api.dataset_download_files(dataset_name, path=LOCAL_DATA_DIR, unzip=True)
 
-def fetch_rapidapi_data(endpoint, params, headers):
-    url = f"https://{RAPIDAPI_HOST}/{endpoint}"
-    response = requests.get(url, headers=headers, params=params)
+    extracted_file_path = os.path.join(LOCAL_DATA_DIR, expected_sqlite_filename)
+    if not os.path.exists(extracted_file_path):
+        raise FileNotFoundError(f"Expected {expected_sqlite_filename} not found in {LOCAL_DATA_DIR}.")
+    
+    print(f"Found SQLite file: {extracted_file_path}")
+    return extracted_file_path
+
+def fetch_rapidapi_data(endpoint):
+    url = f"https://nba-api-free-data.p.rapidapi.com/{endpoint}"
+    headers = {
+        "X-RapidAPI-Key": RAPIDAPI_KEY,
+        "X-RapidAPI-Host": "nba-api-free-data.p.rapidapi.com"
+    }
+    response = requests.get(url, headers=headers)
     response.raise_for_status()
     return response.json()
+
 
 def save_json(data, save_path):
     with open(save_path, "w") as f:
@@ -56,37 +76,37 @@ def save_json(data, save_path):
 # --------- SCRIPT ---------
 
 def main():
-    ### Download Kaggle Datasets
+    ## Download Kaggle Datasets
     kaggle_downloads = [
-        # NBA Salaries Dataset
         {
             "dataset": "omarsobhy14/nba-players-salaries",
             "file": "NBA_season1718_salary.csv",
-            "save_as": "nba_salaries.csv"
+            "save_as": "Nba Player Salaries.csv"
         },
-        # NBA Basketball Dataset
-        {
-            "dataset": "wyattowalsh/basketball",
-            "file": "Player Per Game Stats.csv",
-            "save_as": "player_stats.csv"
-        }
+        # {
+        #     "dataset": "wyattowalsh/basketball",
+        #     "file": "Player Per Game Stats.csv",
+        #     "save_as": "nba.sqlite"
+        # }
     ]
 
     for item in kaggle_downloads:
-        path = download_kaggle_dataset(item["dataset"], item["file"], item["save_as"])
-        upload_to_azure(path, item["save_as"])
+        try:
+            path = download_kaggle_dataset(item["dataset"], item["file"], item["save_as"])
+            upload_to_azure(path, item["save_as"])
+        except Exception as e:
+            print(f"Error processing {item['dataset']}: {e}")
 
     ### Fetch from RapidAPI
-    headers = {
-        "X-RapidAPI-Key": RAPIDAPI_KEY,
-        "X-RapidAPI-Host": RAPIDAPI_HOST
-    }
-    
-    # Example endpoint: getAllPlayers
-    # rapidapi_data = fetch_rapidapi_data(endpoint="players", params={"team":"Golden State Warriors"}, headers=headers)
-    # rapidapi_path = os.path.join(LOCAL_DATA_DIR, "nba_players_api.json")
-    # save_json(rapidapi_data, rapidapi_path)
-    # upload_to_azure(rapidapi_path, "nba_players_api.json")
+    ### Fetch from RapidAPI
+    try:
+        rapidapi_data = fetch_rapidapi_data("nba-leagues")
+        rapidapi_path = os.path.join(LOCAL_DATA_DIR, "nba_leagues_api.json")
+        save_json(rapidapi_data, rapidapi_path)
+        upload_to_azure(rapidapi_path, "nba_leagues_api.json")
+    except Exception as e:
+        print(f"Error fetching data from RapidAPI: {e}")
+
 
 if __name__ == "__main__":
     main()
