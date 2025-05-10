@@ -34,7 +34,7 @@ def main():
 
             team_abbr = row.get('team_abbreviation')
             if not team_abbr:
-                print(f"⚠️ No team abbreviation for player {full_name}")
+                print(f"   No team abbreviation for player {full_name}")
                 continue
 
             # Find player by full name

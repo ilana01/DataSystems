@@ -104,7 +104,7 @@ def main():
             elif filename.endswith(".xls") or filename.endswith(".xlsx"):
                 df = pd.read_excel(io.BytesIO(file_data))
             else:
-                print(f"⚠️ Skipping unsupported file type: {filename}")
+                print(f"   Skipping unsupported file type: {filename}")
                 continue
 
             # --- Process common_player_info.csv ---
@@ -294,12 +294,12 @@ def main():
                         cursor.execute("SELECT Game_Score FROM Game WHERE Game_ID = ?", game_id)
                         result = cursor.fetchone()
                         if not result:
-                            print(f"⚠️ Skipping: Game {game_id} not found in Game table.")
+                            print(f"   Skipping: Game {game_id} not found in Game table.")
                             continue
 
                         game_score = result[0]
                         if not game_score or "-" not in game_score:
-                            print(f"⚠️ Invalid score format for Game {game_id}")
+                            print(f"   Invalid score format for Game {game_id}")
                             continue
 
                         home_score_str, away_score_str = game_score.split(' - ')
@@ -317,12 +317,12 @@ def main():
                         # Ensure both teams exist to avoid FK errors
                         cursor.execute("SELECT 1 FROM Team WHERE Team_ID = ?", home_team_id)
                         if not cursor.fetchone():
-                            print(f"⚠️ Skipping: Home_Team_ID {home_team_id} not found for Game_ID {game_id}")
+                            print(f"   Skipping: Home_Team_ID {home_team_id} not found for Game_ID {game_id}")
                             continue
 
                         cursor.execute("SELECT 1 FROM Team WHERE Team_ID = ?", visitor_team_id)
                         if not cursor.fetchone():
-                            print(f"⚠️ Skipping: Visitor_Team_ID {visitor_team_id} not found for Game_ID {game_id}")
+                            print(f"   Skipping: Visitor_Team_ID {visitor_team_id} not found for Game_ID {game_id}")
                             continue
 
                         # Insert or update home team attendance
