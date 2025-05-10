@@ -50,7 +50,7 @@ def main():
             cursor.execute("SELECT Player_ID FROM Player WHERE LOWER(Player_Name) = LOWER(?)", name.lower())
             result = cursor.fetchone()
             if not result:
-                print(f"❌ Player not found: {name}")
+                print(f"  Player not found: {name}")
                 continue
 
             player_id = result[0]
@@ -73,15 +73,15 @@ def main():
                 player_id, season, ppg, apg, rpg, bpg, spg, ft_pct, fg_pct, tp_pct
             )
 
-            print(f"✅ Stats updated for: {name} (Season: {season})")
+            print(f"  Stats updated for: {name} (Season: {season})")
 
         except Exception as e:
-            print(f"❌ Error processing {row.get('NAME')}: {e}")
+            print(f"  Error processing {row.get('NAME')}: {e}")
 
     conn.commit()
     cursor.close()
     conn.close()
-    print("🎉 Finished uploading player performance statistics.")
+    print("  Finished uploading player performance statistics.")
 
 if __name__ == "__main__":
     main()

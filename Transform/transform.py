@@ -81,10 +81,10 @@ def main():
                     INSERT INTO Player (Player_Name, Current_Salary, League_ID)
                     VALUES (?, ?, ?)
                 """, player_name, salary, league_id)
-                print(f"✅ Inserted player: {player_name}")
+                print(f"  Inserted player: {player_name}")
 
         except Exception as e:
-            print(f"❌ Failed to process player {row.get('Player Name', '[UNKNOWN]')}: {e}")
+            print(f"  Failed to process player {row.get('Player Name', '[UNKNOWN]')}: {e}")
 
 # --- 3. Load and process files from archive/csv ---
 
@@ -144,10 +144,10 @@ def main():
                                 VALUES (?, ?, ?, ?, ?)
                             """, full_name, dob, nationality, height, weight)
                             player_id = cursor.fetchone()[0]
-                            print(f"✅ Inserted new player: {full_name} (ID {player_id})")
+                            print(f"  Inserted new player: {full_name} (ID {player_id})")
 
                     except Exception as e:
-                        print(f"❌ Error processing player {row.get('first_name')} {row.get('last_name')}: {e}")
+                        print(f"  Error processing player {row.get('first_name')} {row.get('last_name')}: {e}")
             # --- Process game.csv ---
             if filename == "game.csv":
                 #df = df.head(1)
@@ -179,10 +179,10 @@ def main():
                                 INSERT INTO Game (Game_ID, Game_Date, Location, Teams_Involved, Game_Score, Game_Description)
                                 VALUES (?, ?, ?, ?, ?, ?)
                             """, game_id, game_date, location, teams_involved, game_score, str(game_description))
-                            print(f"✅ Inserted game: {game_id}")
+                            print(f"  Inserted game: {game_id}")
 
                     except Exception as e:
-                        print(f"❌ Error processing game {row.get('game_id')}: {e}")
+                        print(f"  Error processing game {row.get('game_id')}: {e}")
                                 # --- Process team.csv ---
             if filename == "team.csv":
                 df = df.head(1)
@@ -212,10 +212,10 @@ def main():
                                 INSERT INTO Team (Team_ID, Team_Name, Team_Location, Abbreviation, Year_Founded, League_ID, College_ID)
                                 VALUES (?, ?, ?, ?, ?, ?, ?)
                             """, team_id, team_name, team_location, abbreviation, year_founded, league_id, college_id)
-                            print(f"✅ Inserted team: {team_name} (ID {team_id})")
+                            print(f"  Inserted team: {team_name} (ID {team_id})")
 
                     except Exception as e:
-                        print(f"❌ Error processing team {row.get('full_name', '[UNKNOWN]')}: {e}")
+                        print(f"  Error processing team {row.get('full_name', '[UNKNOWN]')}: {e}")
 
             if filename == "draft_history.csv":
                 df = df.head(1)
@@ -241,7 +241,7 @@ def main():
                                 INSERT INTO College (College_ID, College_Name)
                                 VALUES (?, ?)
                             """, college_id, college_name)
-                            print(f"✅ Inserted college: {college_name} (ID {college_id})")
+                            print(f"  Inserted college: {college_name} (ID {college_id})")
 
                         # --- Handle Player ---
                         cursor.execute("SELECT Player_ID FROM Player WHERE LOWER(Player_Name) = LOWER(?)", player_name)
@@ -258,7 +258,7 @@ def main():
                                 VALUES (?, ?)
                             """, player_name, college_id)
                             player_id = cursor.fetchone()[0]
-                            print(f"✅ Inserted player: {player_name} (ID {player_id})")
+                            print(f"  Inserted player: {player_name} (ID {player_id})")
 
                         # --- Handle Team ---
                         cursor.execute("SELECT Team_ID, College_ID FROM Team WHERE LOWER(Team_Name) = LOWER(?)", team_name)
@@ -278,10 +278,10 @@ def main():
                                 INSERT INTO Team (Team_ID, Team_Name, College_ID)
                                 VALUES (?, ?, ?)
                             """, team_id, team_name, college_id)
-                            print(f"✅ Inserted new team: {team_name} (ID {team_id}) linked to college ID {college_id}")
+                            print(f"  Inserted new team: {team_name} (ID {team_id}) linked to college ID {college_id}")
 
                     except Exception as e:
-                        print(f"❌ Error processing row for player '{row.get('player_name')}': {e}")
+                        print(f"  Error processing row for player '{row.get('player_name')}': {e}")
             # --- Process game_summary.csv ---
             if filename == "game_summary.csv":
                 for _, row in df.iterrows():
@@ -351,21 +351,21 @@ def main():
                         """, game_id, visitor_team_id, away_score, away_result,
                              game_id, visitor_team_id, away_score, away_result)
 
-                        print(f"✅ Linked game {game_id} to teams {home_team_id} (Home) and {visitor_team_id} (Away)")
+                        print(f"  Linked game {game_id} to teams {home_team_id} (Home) and {visitor_team_id} (Away)")
 
                     except Exception as e:
-                        print(f"❌ Error processing game summary row: {e}")
+                        print(f"  Error processing game summary row: {e}")
 
 
 
 
         except Exception as e:
-            print(f"❌ Error loading file {filename}: {e}")
+            print(f"  Error loading file {filename}: {e}")
 
     conn.commit()
     cursor.close()
     conn.close()
-    print("🎉 All data processed successfully.")
+    print("  All data processed successfully.")
 
 # Run main
 if __name__ == "__main__":

@@ -41,7 +41,7 @@ def main():
             cursor.execute("SELECT Player_ID FROM Player WHERE LOWER(Player_Name) = LOWER(?)", full_name)
             player_row = cursor.fetchone()
             if not player_row:
-                print(f"❌ Player '{full_name}' not found in database.")
+                print(f"  Player '{full_name}' not found in database.")
                 continue
 
             player_id = player_row[0]
@@ -50,22 +50,22 @@ def main():
             cursor.execute("SELECT Team_ID FROM Team WHERE LOWER(Abbreviation) = LOWER(?)", team_abbr.strip().lower())
             team_row = cursor.fetchone()
             if not team_row:
-                print(f"❌ Team with abbreviation '{team_abbr}' not found.")
+                print(f"  Team with abbreviation '{team_abbr}' not found.")
                 continue
 
             team_id = team_row[0]
 
             # Update player with team ID
             cursor.execute("UPDATE Player SET Team_ID = ? WHERE Player_ID = ?", team_id, player_id)
-            print(f"✅ Linked player {full_name} to team '{team_abbr}' (ID {team_id})")
+            print(f"  Linked player {full_name} to team '{team_abbr}' (ID {team_id})")
 
         except Exception as e:
-            print(f"❌ Error linking player {row.get('first_name')} {row.get('last_name')}: {e}")
+            print(f"  Error linking player {row.get('first_name')} {row.get('last_name')}: {e}")
 
     conn.commit()
     cursor.close()
     conn.close()
-    print("🎉 Player-team linking complete.")
+    print("  Player-team linking complete.")
 
 if __name__ == "__main__":
     main()
