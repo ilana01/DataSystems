@@ -56,18 +56,18 @@ def main():
                         INSERT INTO Coach (Name, Years_Experience, Contract_Current)
                         VALUES (?, ?, ?)
                     """, name, experience, contract_date)
-                    print(f"✅ Inserted coach: {name}")
+                    print(f"Inserted coach: {name}")
 
             except Exception as e:
-                print(f"❌ Error processing coach '{row.get('Coach')}': {e}")
+                print(f"Error processing coach '{row.get('Coach')}': {e}")
 
     except Exception as e:
-        print(f"❌ Failed to read coach_data.csv: {e}")
+        print(f"Failed to read coach_data.csv: {e}")
 
     conn.commit()
     cursor.close()
     conn.close()
-    print("🎉 Coach data upload complete.")
+    print("Coach data upload complete.")
 
 # Run the script
 if __name__ == "__main__":
