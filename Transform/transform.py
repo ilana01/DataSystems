@@ -75,7 +75,7 @@ def main():
                     SET Current_Salary = ?, League_ID = ?
                     WHERE Player_ID = ?
                 """, salary, league_id, player_id)
-                print(f"🔁 Updated player: {player_name}")
+                print(f"Updated player: {player_name}")
             else:
                 cursor.execute("""
                     INSERT INTO Player (Player_Name, Current_Salary, League_ID)
@@ -93,7 +93,7 @@ def main():
 
     for blob in blob_list:
         filename = blob.name.split("/")[-1]
-        print(f"📄 Processing file: {filename}")
+        print(f"Processing file: {filename}")
 
         try:
             blob_client = container_client.get_blob_client(blob)
@@ -136,7 +136,7 @@ def main():
                                 SET DOB = ?, Nationality = ?, Height = ?, Weight = ?
                                 WHERE Player_ID = ?
                             """, dob, nationality, height, weight, player_id)
-                            print(f"🔁 Updated existing player: {full_name} (ID {player_id})")
+                            print(f"Updated existing player: {full_name} (ID {player_id})")
                         else:
                             cursor.execute("""
                                 INSERT INTO Player (Player_Name, DOB, Nationality, Height, Weight)
@@ -150,7 +150,7 @@ def main():
                         print(f"  Error processing player {row.get('first_name')} {row.get('last_name')}: {e}")
             # --- Process game.csv ---
             if filename == "game.csv":
-                #df = df.head(1)
+                df = df.head(1)
                 for _, row in df.iterrows():
                     try:
                         game_id = int(row.get('game_id'))
@@ -173,7 +173,7 @@ def main():
                                 SET Game_Date = ?, Location = ?, Teams_Involved = ?, Game_Score = ?, Game_Description = ?
                                 WHERE Game_ID = ?
                             """, game_date, location, teams_involved, game_score, str(game_description), game_id)
-                            print(f"🔁 Updated game: {game_id}")
+                            print(f"   Updated game: {game_id}")
                         else:
                             cursor.execute("""
                                 INSERT INTO Game (Game_ID, Game_Date, Location, Teams_Involved, Game_Score, Game_Description)
@@ -185,7 +185,6 @@ def main():
                         print(f"  Error processing game {row.get('game_id')}: {e}")
                                 # --- Process team.csv ---
             if filename == "team.csv":
-                df = df.head(1)
                 for _, row in df.iterrows():
                     try:
                         team_id = int(row.get('id'))
@@ -206,19 +205,20 @@ def main():
                                 SET Team_Name = ?, Team_Location = ?, Abbreviation = ?, Year_Founded = ?, League_ID = ?, College_ID = ?
                                 WHERE Team_ID = ?
                             """, team_name, team_location, abbreviation, year_founded, league_id, college_id, team_id)
-                            print(f"🔁 Updated team: {team_name} (ID {team_id})")
+                            print(f"   Updated team: {team_name} (ID {team_id})")
+                            conn.commit()
                         else:
                             cursor.execute("""
                                 INSERT INTO Team (Team_ID, Team_Name, Team_Location, Abbreviation, Year_Founded, League_ID, College_ID)
                                 VALUES (?, ?, ?, ?, ?, ?, ?)
                             """, team_id, team_name, team_location, abbreviation, year_founded, league_id, college_id)
                             print(f"  Inserted team: {team_name} (ID {team_id})")
+                            conn.commit()
 
                     except Exception as e:
                         print(f"  Error processing team {row.get('full_name', '[UNKNOWN]')}: {e}")
 
             if filename == "draft_history.csv":
-                df = df.head(1)
                 for _, row in df.iterrows():
                     try:
                         player_name = str(row.get("player_name", "")).strip()
@@ -242,6 +242,8 @@ def main():
                                 VALUES (?, ?)
                             """, college_id, college_name)
                             print(f"  Inserted college: {college_name} (ID {college_id})")
+                            conn.commit()
+                            
 
                         # --- Handle Player ---
                         cursor.execute("SELECT Player_ID FROM Player WHERE LOWER(Player_Name) = LOWER(?)", player_name)
@@ -250,7 +252,8 @@ def main():
                         if player_result:
                             player_id = player_result[0]
                             cursor.execute("UPDATE Player SET College_ID = ? WHERE Player_ID = ?", college_id, player_id)
-                            print(f"🔁 Linked college to player: {player_name} (ID {player_id})")
+                            print(f"Linked college to player: {player_name} (ID {player_id})")
+                            conn.commit()
                         else:
                             cursor.execute("""
                                 INSERT INTO Player (Player_Name, College_ID)
@@ -259,6 +262,7 @@ def main():
                             """, player_name, college_id)
                             player_id = cursor.fetchone()[0]
                             print(f"  Inserted player: {player_name} (ID {player_id})")
+                            conn.commit()
 
                         # --- Handle Team ---
                         cursor.execute("SELECT Team_ID, College_ID FROM Team WHERE LOWER(Team_Name) = LOWER(?)", team_name)
@@ -269,7 +273,8 @@ def main():
                             if existing_college_id != college_id:
                                 # Link the existing team to the college
                                 cursor.execute("UPDATE Team SET College_ID = ? WHERE Team_ID = ?", college_id, team_id)
-                                print(f"🔁 Linked existing team '{team_name}' to college ID {college_id}")
+                                print(f"Linked existing team '{team_name}' to college ID {college_id}")
+                                conn.commit()
                         else:
                             # Generate and insert new team linked to the college
                             cursor.execute("SELECT ISNULL(MAX(Team_ID), 0) + 1 FROM Team")
@@ -279,11 +284,13 @@ def main():
                                 VALUES (?, ?, ?)
                             """, team_id, team_name, college_id)
                             print(f"  Inserted new team: {team_name} (ID {team_id}) linked to college ID {college_id}")
+                            conn.commit()
 
                     except Exception as e:
                         print(f"  Error processing row for player '{row.get('player_name')}': {e}")
             # --- Process game_summary.csv ---
             if filename == "game_summary.csv":
+                df = df.head(1)
                 for _, row in df.iterrows():
                     try:
                         game_id = int(row.get('game_id'))
